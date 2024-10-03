@@ -1,0 +1,59 @@
+---
+title: "a1"
+output: html_document
+date: "2024-10-02"
+---
+
+```{r}
+dist.sum <- function(probs) {
+        k <- ncol(probs) 
+        n <- nrow(probs) # number of summands
+        x <- c(0:(n*(k-1))) # range of the sum of n random variables
+        dft <- 1
+        m <- 0
+        v <- 0
+        for (i in 1:n) {
+           p <- as.vector(probs[i,])
+# now pad the vector with zeros so that it has the same length as x
+           p <- c(p,rep(0,length(x)-k)) 
+# update mean and variance
+           m <- m + sum(p*x)
+           v <- v + sum(p*(x-sum(x*p))^2)
+# take the DFT of p and multiply by previous value of dft
+           dft <- dft*fft(p)
+           }
+# take the inverse DFT of dft to obtain the distribution of S
+        p.sum <- fft(dft,inv=T)/length(x)
+# the probability distribution of the sum will be contained in
+# the real components of probs.fft.inv; in theory, the imaginary
+# component is exactly 0 but computationally the imaginary component
+# persists due to rounding error
+        p.sum <- Re(p.sum)
+        output <- list(x=x,probs=p.sum,mean=m,var=v)
+        output
+        }
+```
+
+```{r}
+y_prob <- function(i, j) {
+  if (j == i) return(1 - 1/(i^2))
+  if (j == 0 | j == 2*i) return(1/(2*i^2))
+  else return(0)
+}
+
+n_values <- c(10, 20, 50, 100)
+for (n in n_values) {
+  m <- matrix(NA, nrow = n, ncol = 2*n+1)
+  for (i in 1:n) {
+    for (j in 0:(2*n)) {
+      m[i, j+1] = y_prob(i, j)
+    }
+  }
+  
+  output <- dist.sum(m)
+  output$x <- output$x - n*(n+1)/2
+  output$mean <- output$mean - n*(n+1)/2
+  plot(output$x, output$probs, type = "h", lwd = 4, xlim = c(-n, n), main = paste("Distribution of S_", n, sep = ""))
+  lines(output$x, dnorm(output$x, mean = output$mean, sd = sqrt(output$var)), col = "red", lwd = 4)
+}
+```
