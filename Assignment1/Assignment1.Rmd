@@ -41,7 +41,6 @@ y_prob <- function(i, j) {
 }
 
 n_values <- c(10, 20, 50, 100)
-
 for (n in n_values) {
   m <- matrix(NA, nrow = n, ncol = 2*n+1)
   
