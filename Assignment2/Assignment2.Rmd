@@ -19,61 +19,21 @@ sum(contains_zero) / length(contains_zero)
 ```
 
 ```{r}
-# Load necessary libraries
-library(ggplot2)
-library(gridExtra)
-
-# Set parameters
-num_samples <- 1000
-sample_size <- 500
-
-# Generate 1000 samples from a standard normal distribution
-samples <- replicate(num_samples, rnorm(sample_size))
-
-# Create a list to store Q-Q plots
-qq_plots <- list()
-
-# Generate Q-Q plots for each sample
-for (i in 1:num_samples) {
-  qq_plot <- ggplot(data.frame(sample = samples[, i]), aes(sample = sample)) +
-    stat_qq() +
-    stat_qq_line() +
-    ggtitle(paste("Sample", i)) +
-    theme_minimal() +
-    theme(plot.title = element_text(hjust = 0.5))
-  qq_plots[[i]] <- qq_plot
-}
-
-# Combine all Q-Q plots into one graphic
-grid.arrange(grobs = qq_plots, ncol = 5)
+n <- 500
+samples <- matrix(rnorm(1000*n), ncol = n)
+x_k <- t(apply(samples, 1, sort)) # Ordered values
+tau_k <- (1:n - 0.5)/n
+F_inv <- qnorm(tau_k) # Theoretical quantiles
+plot(rep(F_inv, 1000), c(t(x_k)), xlab = "Theoretical quantiles", ylab = "Sample quantiles") # Superimposed plot
+abline(0, 1, lwd = 3, col = "red")
 ```
 
 ```{r}
-# Load necessary libraries
-library(ggplot2)
-library(gridExtra)
-
-# Set parameters
-num_samples <- 1000
-sample_size <- 500
-
-# Generate 1000 samples from a logistic distribution
-samples <- replicate(num_samples, rlogis(sample_size, location = 0, scale = 1))
-
-# Create a list to store Q-Q plots
-qq_plots <- list()
-
-# Generate Q-Q plots for each sample
-for (i in 1:num_samples) {
-  qq_plot <- ggplot(data.frame(sample = samples[, i]), aes(sample = sample)) +
-    stat_qq(distribution = qlogis, dparams = list(location = 0, scale = 1)) +
-    stat_qq_line(distribution = qlogis, dparams = list(location = 0, scale = 1)) +
-    ggtitle(paste("Sample", i)) +
-    theme_minimal() +
-    theme(plot.title = element_text(hjust = 0.5))
-  qq_plots[[i]] <- qq_plot
-}
-
-# Combine all Q-Q plots into one graphic
-grid.arrange(grobs = qq_plots, ncol = 5)
+n <- 500
+samples <- matrix(rlogis(1000*n), ncol = n)
+x_k <- t(apply(samples, 1, sort)) # Ordered values
+tau_k <- (1:n - 0.5)/n
+F_inv <- qlogis(tau_k) # Theoretical quantiles
+plot(rep(F_inv, 1000), c(t(x_k)), xlab = "Theoretical quantiles", ylab = "Sample quantiles") # Superimposed plot
+abline(0, 1, lwd = 3, col = "red")
 ```
