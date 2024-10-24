@@ -6,16 +6,15 @@ output: html_document
 ```{r}
 n <- 60
 m <- matrix(rlogis(10000*n, location = 0, scale = 1), ncol = n)
-# Sort each sample
-m <- t(apply(m, 1, sort))
-# Compute the confidence interval
+m <- t(apply(m, 1, sort)) # Sort each sample
+# Confidence intervals
 theta_hat <- (m[, 30] + m[, 31]) / 2
-W <- rexp(10000, rate = 1/2)
+W <- rchisq(10000, 2)^2 / 4
 var_hat_theta_hat <- W*4/n
 lower <- theta_hat - 1.645*sqrt(var_hat_theta_hat)
 upper <- theta_hat + 1.645*sqrt(var_hat_theta_hat)
-contains_zero <- (lower <= 0) & (upper >= 0)
-sum(contains_zero) / length(contains_zero)
+# Proportion of intervals containing zero
+sum(lower <= 0 & upper >= 0) / 10000
 ```
 
 ```{r}
@@ -24,16 +23,36 @@ samples <- matrix(rnorm(1000*n), ncol = n)
 x_k <- t(apply(samples, 1, sort)) # Ordered values
 tau_k <- (1:n - 0.5)/n
 F_inv <- qnorm(tau_k) # Theoretical quantiles
-plot(rep(F_inv, 1000), c(t(x_k)), xlab = "Theoretical quantiles", ylab = "Sample quantiles") # Superimposed plot
-abline(0, 1, lwd = 3, col = "red")
+# Superimposed plot
+plot(rep(F_inv, 1000), c(t(x_k)), xlab = "Theoretical quantiles", ylab = "Sample quantiles")
+abline(0, 1, col = "red", lwd = 3)
 ```
 
 ```{r}
 n <- 500
 samples <- matrix(rlogis(1000*n), ncol = n)
 x_k <- t(apply(samples, 1, sort)) # Ordered values
-tau_k <- (1:n - 0.5)/n
+tau_k <- (1:n-0.5)/n
 F_inv <- qlogis(tau_k) # Theoretical quantiles
-plot(rep(F_inv, 1000), c(t(x_k)), xlab = "Theoretical quantiles", ylab = "Sample quantiles") # Superimposed plot
-abline(0, 1, lwd = 3, col = "red")
+# Superimposed plot
+plot(rep(F_inv, 1000), c(t(x_k)), xlab = "Theoretical quantiles", ylab = "Sample quantiles")
+abline(0, 1, col = "red", lwd = 3)
+```
+
+```{r}
+incomes <- read.table("incomes.txt")
+incomes <- unlist(incomes, use.names = F)
+# QQ plot
+qqnorm(log(incomes))
+qqline(log(incomes), col = "red", lwd = 3)
+shapiro.test(log(incomes)) # Shapiro-Wilk test
+# Boxplots
+boxplot(log(incomes))
+boxplot(rnorm(length(incomes)))
+# Line-up plot
+library(nullabor)
+library(ggplot2)
+df <- data.frame(v1 = qlogis((1:200-0.5)/200), v2 = log(incomes))
+line_up <- lineup(null_dist("v2", "normal"), df)
+ggplot(line_up, aes(v1, v2)) + geom_point(cex = .5) + facet_wrap(~ .sample) + theme_minimal()
 ```
