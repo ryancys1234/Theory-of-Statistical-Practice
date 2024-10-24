@@ -14,20 +14,20 @@ dist.sum <- function(probs) {
   
   for (i in 1:n) {
     p <- as.vector(probs[i,])
-    p <- c(p,rep(0,length(x)-k)) # Pad the vector with zeros so that it has the same length as x
+    p <- c(p, rep(0, length(x)-k)) # Pad the vector with zeros so that it has the same length as x
     # Update the mean and variance
     m <- m + sum(p*x)
     v <- v + sum(p*(x-sum(x*p))^2)
     dft <- dft*fft(p) # Take the DFT of p and multiply by previous value of dft
   }
   
-  p.sum <- fft(dft,inv=T)/length(x) # Take the inverse DFT of dft to obtain the distribution of S
+  p.sum <- fft(dft, inv=T)/length(x) # Take the inverse DFT of dft to obtain the distribution of S
   # The probability distribution of the sum will be contained in
   # the real components of probs.fft.inv; in theory, the imaginary
   # component is exactly 0 but computationally the imaginary component
   # persists due to rounding error.
   p.sum <- Re(p.sum)
-  output <- list(x=x,probs=p.sum,mean=m,var=v)
+  output <- list(x = x, probs = p.sum, mean = m, var = v)
   return(output)
 }
 ```
