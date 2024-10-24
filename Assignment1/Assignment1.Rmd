@@ -14,17 +14,14 @@ dist.sum <- function(probs) {
   
   for (i in 1:n) {
     p <- as.vector(probs[i,])
-    # Pad the vector with zeros so that it has the same length as x
-    p <- c(p,rep(0,length(x)-k)) 
+    p <- c(p,rep(0,length(x)-k)) # Pad the vector with zeros so that it has the same length as x
     # Update the mean and variance
     m <- m + sum(p*x)
     v <- v + sum(p*(x-sum(x*p))^2)
-    # Take the DFT of p and multiply by previous value of dft
-    dft <- dft*fft(p)
+    dft <- dft*fft(p) # Take the DFT of p and multiply by previous value of dft
   }
   
-  # Take the inverse DFT of dft to obtain the distribution of S
-  p.sum <- fft(dft,inv=T)/length(x)
+  p.sum <- fft(dft,inv=T)/length(x) # Take the inverse DFT of dft to obtain the distribution of S
   # The probability distribution of the sum will be contained in
   # the real components of probs.fft.inv; in theory, the imaginary
   # component is exactly 0 but computationally the imaginary component
@@ -55,10 +52,8 @@ for (n in n_values) {
     }
   }
   
-  # Apply the dist.sum function
-  output <- dist.sum(m)
-  # Obtain the distribution of the sum of X_i's
-  output$x <- output$x - n*(n+1)/2
+  output <- dist.sum(m) # Apply the dist.sum function
+  output$x <- output$x - n*(n+1)/2 # Obtain the distribution of the sum of X_i's
   output$mean <- output$mean - n*(n+1)/2
   # Plot the sum's distribution with the normal distribution
   plot(output$x, output$probs, type = "h", lwd = 4, xlim = c(-n, n), main = paste("Distribution of S_", n, sep = ""), xlab = "", ylab = "")
