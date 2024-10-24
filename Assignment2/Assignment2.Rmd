@@ -4,6 +4,21 @@ output: html_document
 ---
 
 ```{r}
+n <- 60
+m <- matrix(rlogis(10000*n, location = 0, scale = 1), ncol = n)
+# Sort each sample
+m <- t(apply(m, 1, sort))
+# Compute the confidence interval
+theta_hat <- (m[, 30] + m[, 31]) / 2
+W <- rexp(10000, rate = 1/2)
+var_hat_theta_hat <- W*4/n
+lower <- theta_hat - 1.645*sqrt(var_hat_theta_hat)
+upper <- theta_hat + 1.645*sqrt(var_hat_theta_hat)
+contains_zero <- (lower <= 0) & (upper >= 0)
+sum(contains_zero) / length(contains_zero)
+```
+
+```{r}
 # Load necessary libraries
 library(ggplot2)
 library(gridExtra)
