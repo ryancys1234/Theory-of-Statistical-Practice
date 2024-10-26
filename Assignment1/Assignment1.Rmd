@@ -30,9 +30,7 @@ dist.sum <- function(probs) {
   output <- list(x = x, probs = p.sum, mean = m, var = v)
   return(output)
 }
-```
 
-```{r}
 # Calculate the probability of y_i = j
 y_prob <- function(i, j) {
   if (j == i) return(1 - 1/(i^2))
