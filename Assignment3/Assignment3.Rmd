@@ -1,0 +1,83 @@
+---
+title: "STA355H1 - Assignment 3"
+output: html_document
+---
+
+# Q1 (e)
+
+```{r}
+n_i = c(27, 17, 7, 1, 5, 6, 15, 9, 18, 16, 5, 7, 19)
+m_i = c(0, 0, 0, 0, 0, 2, 1, 5, 5, 4, 2, 2, 3)
+t_i = c(10, 37, 54, 61, 62, 67, 71, 85, 89, 102, 114, 117, 122)
+omega_hat <- sum(m_i) / sum(n_i * t_i)
+N_hat <- 1 / omega_hat
+omega_hat
+N_hat
+# Confidence intervals
+se_omega <- sqrt(sum(m_i)) / sum(n_i * t_i)
+lower_omega <- omega_hat - qnorm(0.975)*se_omega
+upper_omega <- omega_hat + qnorm(0.975)*se_omega
+c(lower_omega, upper_omega)
+lower_N <- 1 / upper_omega
+upper_N <- 1 / lower_omega
+c(lower_N, upper_N)
+# Plot of the log likelihood function
+omegas <- seq(from = 0.001, to = 0.0045, by = 0.0001)
+lg_lik <- function(omega) {
+  sum(m_i*log(n_i*t_i*omega) - n_i*t_i*omega - log(factorial(m_i)))
+}
+plot(omegas, sapply(omegas, function(x) lg_lik(x)), type = "l", main = "Log likelihood function", xlab = "Omega", ylab = "Log likehood")
+abline(v = c(lower_omega, upper_omega), lty = 2)
+```
+
+# Q2 (b) (i)
+
+```{r, warning = F}
+suppressMessages(library(circular))
+set.seed(100)
+n <- 200
+kappa <- 2
+X <- rvonmises(n = n, mu = 0, kappa = kappa)
+plot(X, pch = 1, main = "Directional data with mu = 0") # Plot of the directional data
+# Plot of the log likelihood function
+mus <- seq(from = -pi, to = pi, by = 0.1)
+lg_lik <- function(mu) {
+  kappa*sum(cos(X - mu)) - n*log(2*pi*besselI(kappa, 0))
+}
+plot(mus, sapply(mus, function(x) lg_lik(x)), type = "l", main = "Log likelihood function", xlab = "Mu", ylab = "Log likehood")
+```
+
+# Q2 (b) (ii)
+
+```{r}
+# MLE of mu
+mu_hat <- function(X) {
+  atan(sum(sin(X)) / sum(cos(X)))
+}
+mu_hat(X)
+```
+
+# Q2 (b) (iii)
+
+```{r}
+# Jackknife SE estimate
+lst <- NULL
+for (i in 1:n) lst <- c(lst, mu_hat(X[-i]))
+sqrt((n-1)*sum((lst-mean(lst))^2) / n)
+# Fisher information SE estimate
+se_mu <- (kappa*sum(cos(X-mu_hat(X))))**(-1/2) 
+se_mu
+```
+
+# Q2 (e)
+
+```{r}
+# Approximate confidence interval
+lower <- mu_hat(X) - sqrt(qchisq(0.95, 1))*se_mu
+upper <- mu_hat(X) + sqrt(qchisq(0.95, 1))*se_mu
+c(lower, upper)
+# Fisher information confidence interval
+lower <- mu_hat(X) - qnorm(0.975)*se_mu
+upper <- mu_hat(X) + qnorm(0.975)*se_mu
+c(lower, upper)
+```
