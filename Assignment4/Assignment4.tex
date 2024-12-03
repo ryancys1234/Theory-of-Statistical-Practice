@@ -1,0 +1,66 @@
+\documentclass[12pt]{article}
+\usepackage[left=.5in, right=.5in, top=.5in, bottom=.5in]{geometry}
+\usepackage[parfill]{parskip}
+\usepackage{amsmath, amssymb}
+\pagenumbering{gobble}
+\setlength\parindent{0pt}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\p}{\mathbb{P}}
+\newcommand{\se}{\text{se}}
+\newcommand{\h}[1]{\hat{#1}}
+
+\begin{document}
+
+\begin{center}
+{\Large STA355H1 - Assignment 4}
+\end{center}
+
+\begin{enumerate}
+    \item
+    \begin{enumerate}
+        \item The NP test statistic is \begin{align*}
+            T(X_1, \ldots, X_n) = \frac{f(X_1, \ldots, X_n; \mu = 0, \sigma^2 = 3)}{f(X_1, \ldots, X_n; \mu = 0, \sigma^2 = 2)} = \frac{2^n \exp(-\sum_{i=1}^n X_i^2 / 6)}{3^n \exp(-\sum_{i=1}^n X_i^2 / 4)} = \frac{2^n}{3^n} \exp(\frac{1}{12} \sum_{i=1}^n X_i^2)
+        \end{align*} and by the NP lemma, the MP test rejects $H_0$ at level $\alpha$ if $\sum_{i=1}^n T(X_1,\ldots,X_n) \geq \eta$ where $\p_{\sigma^2 = 2}(\sum_{i=1}^n T(X_1,\ldots,X_n) \geq \eta) = \alpha$ for some $\eta$. Notice that since \begin{align*}
+            \p_{\sigma^2 = 2}(\sum_{i=1}^n T(X_1,\ldots,X_n) \geq \eta) &= \p_{\sigma^2 = 2}(\exp(\frac{1}{12} \sum_{i=1}^n X_i^2) \geq \frac{3^n\eta}{2^n}) = \p_{\sigma^2 = 2}(\sum_{i=1}^n X_i^2 \geq 12\ln(\frac{3^n\eta}{2^n}))
+        \end{align*} this is equivalent to rejecting $H_0$ at level $\alpha$ if $\sum_{i=1}^n X_i^2 \geq k := 12\ln(3^n\eta/2^n)$.
+        \item Define $Z_i \sim \mathcal{N}(0,1)$ and note that $\sum_{i=1}^{20} Z_i^2 \sim \chi^2(20)$. Since $Z_i = X_i/\sqrt{2}$ for $X_i \sim \mathcal{N}(0,2)$, we have $\sum_{i=1}^{20} X_i^2 = \sum_{i=1}^{20} 2Z_i^2 \sim 2\chi^2(20)$. Then, \begin{align*}
+            &\p_{\sigma^2 = 2} (\sum_{i=1}^n X_i^2 \geq k) = \p_{\sigma^2 = 2} (2\chi^2(20) \geq k) = 1 - \p_{\sigma^2 = 2} (\chi^2(20) < k/2) = 0.01\\
+            \implies &\p_{\sigma^2 = 2} (\chi^2(20) < k/2) = 0.99
+        \end{align*} which gives $k = 2(37.57) = 75.14$ using R; see the attached code and output.
+        \item Denote $\sigma_1^2$ as the $\sigma^2$ under $H_1$. The test is UMP since $\p_{\sigma^2 = 2}(\sum_{i=1}^n X_i^2 \geq k) = \alpha$ stays the same and $T(X_1, \ldots, X_n)$ increases with $\sigma_1^2$ for the same $k$, thereby increasing the power.
+    \end{enumerate}
+    \item
+    \begin{enumerate}
+        \item The prior distribution function is \begin{align*}
+            \int_{-\infty}^x \pi(\theta) d\theta = \beta\lambda^\beta \int_\lambda^x \theta^{-\beta-1} d\theta = -\lambda^\beta \theta^{-\beta} |_\lambda^x = - \lambda^\beta x^{-\beta} + \lambda^\beta \lambda^{-\beta} = 1 - \lambda^\beta x^{-\beta} = F(x)
+        \end{align*} for $x>\lambda$ and to find the quantile function, \begin{align*}
+            y = 1 - \lambda^\beta x^{-\beta} \implies x = (\frac{1-y}{\lambda^\beta})^{-1/\beta} = \lambda (1-y)^{-1/\beta} = F^{-1}(y)
+        \end{align*} for $y\in(0,1)$. For the one-sided credible intervals for $\theta$, note that for $p \in (0,1)$, $\p(\lambda < \theta \leq F^{-1}(p)) = p$ and $\p(\theta > F^{-1}(1-p)) = 1-\p(\theta \leq F^{-1}(1-p)) = 1-(1-p) = p$, so the 100$p\%$ intervals are $(\lambda, F^{-1}(p)] = (\lambda, \lambda(1-p)^{-1/\beta}]$ and $[F^{-1}(1-p), \infty) = [\lambda p^{-1/\beta}, \infty)$.
+
+        For a two-sided credible interval for $\theta$, note that $\p(F^{-1}(\frac{1-p}{2}) \leq \theta \leq F^{-1}(\frac{1+p}{2})) = \p(\theta \leq F^{-1}(\frac{1+p}{2})) - \p(\theta < F^{-1}(\frac{1-p}{2})) = \frac{1+p}{2} - \frac{1-p}{2} = p$, so the 100$p\%$ interval is $[F^{-1}(\frac{1-p}{2}), F^{-1}(\frac{1+p}{2})] = [\lambda(\frac{1+p}{2})^{-1/\beta}, \lambda(\frac{1-p}{2})^{-1/\beta}]$. In fact, this can be generalized to $[F^{-1}(o), F^{-1}(o+p)] = [\lambda(1-o)^{-1/\beta}, \lambda(1-o-p)^{-1/\beta}]$ for any $o \in (0,1-p)$.
+
+        The prior mean is $\E(\theta|\beta>1) = \int_{-\infty}^\infty \theta\pi(\theta) d\theta = \beta\lambda^\beta \int_\lambda^\infty \theta^{-\beta} d\theta = \beta\lambda^\beta (-\frac{\theta^{1-\beta}}{1-\beta})|_\lambda^\infty = 0 + \beta\lambda^\beta \frac{\lambda^{1-\beta}}{1-\beta} = \beta\lambda/(1-\beta)$.
+    \end{enumerate}
+    \item
+    \begin{enumerate}
+        \item Assume that $X_1,\ldots,X_n$ are independent. To find $\pi(\theta|x_1,\ldots,x_n)$, \begin{align*}
+            \pi(\theta)p(x_1,\ldots,x_n;\theta) &= \frac{\lambda^\alpha \theta^{\alpha-1}}{\Gamma(\alpha)} e^{-\lambda \theta} \prod_{i=1}^n \frac{\theta^{x_i}}{x_i!} e^{-\theta} = \frac{\lambda^\alpha \theta^{\alpha-1+\sum_{i=1}^n x_i}}{\Gamma(\alpha) \prod_{i=1}^n x_i!} e^{-\theta(\lambda+n)}\\
+            \int_{\mathbb{R}} \pi(s) p(x_1,\ldots,x_n;\theta) ds &= \int_0^\infty \frac{\lambda^\alpha s^{\alpha-1+\sum_{i=1}^n x_i}}{\Gamma(\alpha) \prod_{i=1}^n x_i!} e^{-s(\lambda+n)} ds\\
+            &= \frac{\lambda^\alpha}{\Gamma(\alpha) \prod_{i=1}^n x_i!} \int_0^\infty s^{\alpha-1+\sum_{i=1}^n x_i} e^{-s(\lambda+n)} ds\\
+            &= \frac{\lambda^\alpha}{\Gamma(\alpha) \prod_{i=1}^n x_i!} \int_0^\infty \Big( \frac{u}{\lambda+n} \Big)^{\alpha-1+\sum_{i=1}^n x_i} e^{-u} \frac{du}{\lambda+n} \quad (1)\\
+            &= \frac{\lambda^\alpha}{\Gamma(\alpha) (\lambda+n)^{\alpha+\sum_{i=1}^n x_i} \prod_{i=1}^n x_i!} \int_0^\infty u^{\alpha-1+\sum_{i=1}^n x_i} e^{-u} du\\
+            &= \frac{\lambda^\alpha \Gamma(\alpha + \sum_{i=1}^n x_i)}{\Gamma(\alpha) (\lambda+n)^{\alpha+\sum_{i=1}^n x_i} \prod_{i=1}^n x_i!} \quad (2)\\
+            \pi(\theta|x_1,\ldots,x_n) &= \frac{\pi(\theta)p(x_1,\ldots,x_n;\theta)}{\int_{\mathbb{R}} \pi(s) p(x_1,\ldots,x_n;\theta) ds} = \frac{\theta^{\alpha-1+\sum_{i=1}^n x_i} (\lambda+n)^{\alpha+\sum_{i=1}^n x_i}}{\Gamma(\alpha + \sum_{i=1}^n x_i)} e^{-\theta(\lambda+n)}\\
+            &= g(\theta; \alpha+\sum_{i=1}^n x_i, \lambda+n)
+        \end{align*} where we used $u = s(\lambda+n)$ such that $du = (\lambda+n)ds$ in (1) and the definition of the Gamma function in (2). Note that this is only a valid density when $\sum_{i=1}^n x_i > \alpha$. Furthermore, \begin{align*}
+            \lim \limits_{\alpha \to 0} \pi(\theta|x_1,\ldots,x_n) &= e^{-\theta(\lambda+n)} \lim \limits_{\alpha \to 0} \frac{\theta^{\alpha-1+\sum_{i=1}^n x_i} (\lambda+n)^{\alpha+\sum_{i=1}^n x_i}}{\Gamma(\alpha + \sum_{i=1}^n x_i)}\\
+            &= e^{-\theta(\lambda+n)} \frac{\theta^{-1+\sum_{i=1}^n x_i} (\lambda+n)^{\sum_{i=1}^n x_i}}{\Gamma(\sum_{i=1}^n x_i)} = g(\theta; \sum_{i=1}^n x_i, \lambda+n)
+        \end{align*} which is a proper density when $\sum_{i=1}^n x_i > 0$.
+        \item First, noting that $\Gamma(\alpha+1) = \alpha \Gamma(\alpha)$, \begin{align*}
+            \int_0^\infty \theta g(\theta;\alpha,\lambda) d\theta &= \int_0^\infty \frac{\lambda^\alpha \theta^{\alpha-1+1}}{\Gamma(\alpha)} e^{-\lambda \theta} d\theta = \frac{\alpha}{\lambda} \int_0^\infty \frac{\lambda^{\alpha+1} \theta^{\alpha-1+1}}{\Gamma(\alpha+1)} e^{-\lambda \theta} d\theta\\
+            &= \frac{\alpha}{\lambda} \int_0^\infty g(\theta; \alpha+1,\lambda) d\theta = \frac{\alpha}{\lambda}
+        \end{align*} so $\E(\theta) = \alpha/\lambda$ since the prior density is $g(\theta;\alpha,\lambda)$ and similarly $\E(\theta|x_1,\ldots,x_n) = (\alpha+\sum_{i=1}^n x_i)/(\lambda+n)$ since the posterior density is $g(\theta;\alpha+\sum_{i=1}^n x_i,\lambda+n)$.
+    \end{enumerate}
+\end{enumerate}
+
+\end{document}
