@@ -1,0 +1,83 @@
+\documentclass[12pt]{article}
+\usepackage[left=.5in, right=.5in, top=.5in, bottom=.5in]{geometry}
+\usepackage[parfill]{parskip}
+\usepackage{amsmath, amssymb}
+\pagenumbering{gobble}
+\setlength\parindent{0pt}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\p}{\mathbb{P}}
+\newcommand{\se}{\text{se}}
+\newcommand{\h}[1]{\hat{#1}}
+
+\begin{document}
+
+\begin{center}
+{\Large STA355H1 - Assignment 3}
+\end{center}
+
+\begin{enumerate}
+    \item
+    \begin{enumerate}
+        \item From the slides of lecture 8, $M$ follows a hypergeometric distribution with parameters $n_0,n_1,N$ and $\p(M=m;N)=\dfrac{\binom{n_0}{m}\binom{N-n_0}{n_1-m}}{\binom{N}{n_1}}$ for $0\leq m\leq n_1$, using the convention that $\binom{n}{k}=0$ if $n<k$. To determine $\E(M)$, first note that \begin{align*}
+            m\binom{n_0}{m} = \frac{n_0!}{(m-1)!(n_0-m)!} = \frac{n_0(n_0-1)!}{(m-1)!((n_0-1)-(m-1))!} = n_0\binom{n_0-1}{m-1}.
+        \end{align*} Then, \begin{align*}
+            \E_N(M) &= \sum_{m=0}^{n_1} m\p(M=m) = \sum_{m=1}^{n_1} m\frac{\binom{n_0}{m}\binom{N-n_0}{n_1-m}}{\binom{N}{n_1}} = \frac{n_0n_1}{N}\sum_{m=1}^{n_1} \frac{\binom{n_0-1}{m-1}\binom{(N-1)-(n_0-1)}{(n_1-1)-(m-1)}}{\binom{N-1}{n_1-1}}\\
+            &= \frac{n_0n_1}{N}\sum_{m'=0}^{n_1-1} \frac{\binom{n_0-1}{m'}\binom{(N-1)-(n_0-1)}{(n_1-1)-m'}}{\binom{N-1}{n_1-1}} = \frac{n_0n_1}{N}
+        \end{align*} where the last summation equals 1 since it is the sum of all probabilities of a hypergeometric distribution with parameters $n_0-1,n_1-1,N-1$. By the method of moments, $M=n_0n_1/\h{N}\implies\h{N}=n_0n_1/M$. Notice that this estimator is unstable for small positive values of $M$ and undefined when $M=0$.
+        \item First note that $t_1 = n_0$. Applying the definition of conditional probability recursively yields \begin{align*}
+            \p(M_1=m_1,\ldots,M_k=m_k) &= \p(M_1=m_1)\prod_{i=2}^k \p(M_i=m_i|M_1=m_1,\ldots,M_{i-1}=m_{i-1})\\
+            &= \frac{\binom{n_0}{m_1}\binom{N-n_0}{n_1-m_1}}{\binom{N}{n_1}} \prod_{i=2}^k \frac{\binom{t_i}{m_i}\binom{N-t_i}{n_i-m_i}}{\binom{N}{n_i}} = \prod_{i=1}^k \frac{\binom{t_i}{m_i}\binom{N-t_i}{n_i-m_i}}{\binom{N}{n_i}}\\
+            &= \mathcal{L}(N).
+        \end{align*} where $N-t_k-n_k+m_k\geq 0$ or equivalently $N\geq\Sigma_{j=0}^k(n_j-m_j)$ due to $\binom{N-t_i}{n_i-m_i}$. To derive the maximum likelihood estimate, we determine the log-likelihood function: \begin{align*}
+            \log\mathcal{L}(N) &= \sum_{i=1}^k \log\frac{t_i!(N-t_i)!n_i!(N-n_i)!}{m_i!(t_i-m_i)!(n_i-m_i)!(N-t_i-n_i+m_i)!N!}\\
+            &\propto \sum_{i=1}^k \log\frac{(N-t_i)!(N-n_i)!}{(N-t_i-n_i+m_i)!N!}
+        \end{align*} which we maximize by taking its derivative with respect to $N$ and setting it to 0. The solution for $N$ is then the estimate $\h{N}$, which must satisfy the constraints $\h{N}\in\mathbb{N}$ and $\h{N}\geq\Sigma_{j=0}^k (n_j-m_j)$ as before. Finally, we check if $(\log\mathcal{L}(\h{N}))''>0$ to confirm if $\h{N}$ is a true maximum.
+        \item Adapting the likelihood function from the previous part, \begin{align*}
+            \mathcal{L}(\omega) &= \prod_{i=1}^k \frac{\binom{t_i}{m_i}\binom{1/\omega-t_i}{n_i-m_i}}{\binom{1/\omega}{n_i}} \approx \prod_{i=1}^k \frac{\exp(-n_it_i\omega)(n_it_i\omega)^{m_i}}{m_i!}\\
+            \ln\mathcal{L}(\omega) &\approx \sum_{i=1}^k \ln\frac{\exp(-n_it_i\omega)(n_it_i\omega)^{m_i}}{m_i!} = \sum_{i=1}^k (m_i\ln(n_it_i\omega)-n_it_i\omega-\ln(m_i!))\\
+            (\ln\mathcal{L}(\omega))' &= \sum_{i=1}^k (\frac{m_i}{n_it_i\omega}n_it_i-n_it_i) = \sum_{i=1}^k (\frac{m_i}{\omega}-n_it_i) = \sum_{i=1}^k \frac{m_i}{\omega} - \sum_{i=1}^k n_it_i \overset{\text{set}}{=} 0
+        \end{align*} which yields $\h{\omega} = (\sum_{i=1}^k m_i)/(\sum_{i=1}^k n_it_i)$. Note that this is indeed a maximum since $(\ln\mathcal{L}(\h{\omega}))'' = -(\Sigma_{i=1}^k m_i)/\h{\omega}^2 < 0$. An estimator for $N$ is then $\h{N} = 1/\h{\omega} = (\sum_{i=1}^k n_it_i)/(\sum_{i=1}^k m_i)$.
+        \item By the definition of the standard error estimator from the slides of lecture 10, \begin{align*}
+            \widehat{\se}(\h{\omega}) &= (-\frac{d^2}{d\omega^2} \ln\mathcal{L}(\h{\omega}))^{-1/2} = (\frac{1}{\h{\omega}^2}\sum_{i=1}^k m_i)^{-1/2} = \frac{(\sum_{i=1}^k m_i)^{1/2}}{\sum_{i=1}^k n_it_i}.
+        \end{align*}
+        \item Since the Poisson distribution is part of the exponential family, we can assume that $\sqrt{nI(\omega)}(\h{\omega}-\omega)$ approximately $\sim \mathcal{N}(0,1)$, or equivalently $(\h{\omega}-\omega)/\widehat{\se}(\h{\omega})$ approximately $\sim \mathcal{N}(0,1)$, so we have \begin{align*}
+            0.95 &\approx \p(-1.96\widehat{\se}(\h{\omega}) \leq \h{\omega}-\omega \leq 1.96\widehat{\se}(\h{\omega}))\\
+            &= \p(\h{\omega} - 1.96\widehat{\se}(\h{\omega}) \leq \omega \leq \h{\omega} + 1.96\widehat{\se}(\h{\omega}))\\
+            &= \p\Big(\frac{1}{\h{\omega} + 1.96\widehat{\se}(\h{\omega})} \leq N \leq \frac{1}{\h{\omega} - 1.96\widehat{\se}(\h{\omega})}\Big)
+        \end{align*} which indicates that the $95\%$ CIs for $\omega$ and $N$ are $[\h{\omega} - 1.96\widehat{\se}(\h{\omega}), \h{\omega} + 1.96\widehat{\se}(\h{\omega})]$ and $[(\h{\omega} + 1.96\widehat{\se}(\h{\omega}))^{-1}, (\h{\omega} - 1.96\widehat{\se}(\h{\omega}))^{-1}]$ respectively. See the attached code, numerical results, and plot. Since $N\in\mathbb{N}$, we can round the results to get $\h N = 451$ with a $95\%$ CI of $[322, 752]$.
+    \end{enumerate}
+    \item
+    \begin{enumerate}
+        \item Holding $\kappa$ fixed, \begin{align*}
+            \mathcal{L}(\mu) &= \prod_{i=1}^n \frac{1}{2\pi I_0(\kappa)} \exp(\kappa\cos(X_i-\mu)) = \frac{1}{(2\pi I_0(\kappa))^n} \prod_{i=1}^n \exp(\kappa\cos(X_i-\mu))\\
+            \log\mathcal{L}(\mu) &= \kappa\sum_{i=1}^n\cos(X_i-\mu) - n\log(2\pi I_0(\kappa))\\
+            (\log\mathcal{L}(\mu))' &= \kappa\sum_{i=1}^n\sin(X_i-\mu) = \kappa(\cos(\mu)\sum_{i=1}^n\sin(X_i)-\sin(\mu)\sum_{i=1}^n\cos(X_i)) \overset{\text{set}}{=} 0
+        \end{align*} which implies that the estimate $\h{\mu}$ satisfies $\cos(\h{\mu})\Sigma_{i=1}^n\sin(X_i)-\sin(\h{\mu})\Sigma_{i=1}^n\cos(X_i)=0$. Next, \begin{align*}
+            \frac{\sum_{i=1}^n\sin(X_i)}{\sum_{i=1}^n\cos(X_i)} = \frac{\sin(\h{\mu})}{\cos(\h{\mu})} = \tan(\h{\mu}) \implies \h{\mu} = \arctan(\frac{\sum_{i=1}^n\sin(X_i)}{\sum_{i=1}^n\cos(X_i)})
+        \end{align*} which has more than one solution; the solution where $(\log\mathcal{L}(\h{\mu}))'' = -\kappa\Sigma_{i=1}^n\cos(X_i-\h{\mu}) < 0$ is therefore the MLE.
+        \item \begin{enumerate}
+            \item See the attached code and plots. The mean direction is chosen to be 0.
+            \item See the attached code and numerical result. Note that the log-likelihood plot from the previous part shows that the function is concave down at the calculated estimate, confirming that it is the MLE.
+                \item The jackknife estimate is $\widehat{\se}(\h{\mu}) = (\frac{n-1}{n}\Sigma_{i=1}^n (\h{\mu}_{-i}-\h{\mu}_\bullet))^{1/2}$ and the information estimate is $\widehat{\se}(\h{\mu}) = (-\frac{d^2}{d\mu^2} \ln\mathcal{L}(\h{\mu}))^{-1/2} = (\kappa\Sigma_{i=1}^n\cos(X_i-\h{\mu}))^{-1/2}$. See the attached code and numerical results. The estimates are similar, with the jackknife estimate being larger. In addition, the estimates are quite large with respect to $\h\mu$, though this is likely due to the initial choice of $\mu = 0$.
+        \end{enumerate}
+        \item Define $\ell(\theta) = \ln\mathcal{L}(\theta)$ for some parameter $\theta$. Assuming regularity conditions, we have $\h\mu \overset{p}{\to} \mu$, meaning we can approximate $\mu$ with a second order Taylor expansion around $\h\mu$: \begin{align*}
+            &\ell(\mu) \approx \ell(\h\mu) + \ell'(\h\mu)(\mu-\h\mu) + \frac{1}{2}\ell''(\h\mu)(\mu-\h\mu) = \ell(\h\mu) + \frac{1}{2}\ell''(\h\mu)(\mu-\h\mu) \text{ since } \ell'(\h\mu) = 0\\
+            \implies &2(\ell(\h\mu) - \ell(\mu)) \approx -\ell''(\h\mu)(\mu-\h\mu).
+        \end{align*} Next, the von Mises distribution is part of the exponential family since its density can be written as \begin{align*}
+            f(x;\kappa,\mu) &= \exp(c(\kappa,\mu)T(x) - d(\kappa,\mu) + h(x))\\
+            &= \exp(\kappa\cos(x)\cos(\mu)+\kappa\sin(x)\sin(\mu) - \log(I_0(\kappa)) - \log(2\pi))\\
+            &= \exp(\begin{bmatrix} \kappa\cos(\mu) \\ \kappa\sin(\mu) \end{bmatrix} \cdot \begin{bmatrix} \cos(x) \\ \sin(x) \end{bmatrix} - \log(I_0(\kappa)) - \log(2\pi)).
+        \end{align*} Then, $-\ell''(\h\mu) \approx nI(\mu)$ by the slides of lecture 11, so we have $2(\ln\mathcal{L}(\h\mu) - \ln\mathcal{L}(\mu)) \approx nI(\mu)(\h\mu - \mu)^2$ as needed. Note that $2(\ln\mathcal{L}(\h\mu) - \ln\mathcal{L}(\mu))$ is an approximate pivot for $\mu$ since $\sqrt{nI(\mu)}(\h\mu - \mu)$ approximately $\sim \mathcal{N}(0,1)$ implies $nI(\mu)(\h\mu - \mu)^2$ approximately $\sim \chi^2(1)$.
+
+        \textit{Addendum:} We can also show that $-\ell''(\mu) \approx nI(\mu^*)$, which represents the theoretical Fisher information here. WLOG, assume that $\mu<\h\mu$, so the mean value theorem states that $\exists c \in (\mu, \h\mu)$ such that $\ell''(\h\mu)-\ell''(\mu) = (\h\mu-\mu)\ell'''(c)$. Since $\h\mu \overset{p}{\to} \mu$ as before and $|\ell'''(c)| = \kappa\Sigma_{i=1}^n \sin(X_i-c) \leq n\kappa$, we have $(\h\mu-\mu)\ell'''(c) \overset{p}{\to} 0$ by continuous mapping, implying $\ell''(\h\mu) \overset{p}{\to} \ell''(\mu)$. Furthermore, $\frac{1}{n}\ell''(\mu) = \frac{1}{n}\Sigma_{i=1}^n \frac{\partial^2}{\partial\mu^2} \ln f(X_i; \kappa,\mu) \overset{p}{\to} \E[\frac{\partial^2}{\partial\mu^2} \ln f(X_i; \kappa,\mu)] = -I(\mu^*)$ by the WLLN.
+        \item Assume $I(\mu) \neq 0$. Using the approximate pivot, \begin{align*}
+            0.95 &\approx \p(nI(\mu)(\h\mu - \mu)^2 \leq \chi^2_{0.95}) = \p((\h\mu - \mu)^2 \leq \frac{\chi^2_{0.95}}{nI(\mu)})\\
+            &= \p\Big(\h\mu - \sqrt{\frac{\chi^2_{0.95}}{nI(\mu)}} \leq \mu \leq \h\mu + \sqrt{\frac{\chi^2_{0.95}}{nI(\mu)}}\Big)
+        \end{align*} where $\chi^2_{0.95}$ is the chi-squared critical value corresponding to a $95\%$ CI for 1 degree of freedom. Using the observed Fisher information, \begin{align*}
+            0.95 \approx \p(-1.96 \leq \sqrt{nI(\mu)}(\h\mu-\mu) \leq 1.96) = \p\Big(\h\mu - \frac{1.96}{\sqrt{nI(\mu)}} \leq \mu \leq \h\mu + \frac{1.96}{\sqrt{nI(\mu)}}\Big)
+        \end{align*} since $\sqrt{nI(\mu)}(\h\mu-\mu)$ approximately $\sim \mathcal{N}(0,1)$. Thus, the $95\%$ CIs are $[\h\mu - \sqrt{\frac{\chi^2_{0.95}}{nI(\mu)}}, \h\mu + \sqrt{\frac{\chi^2_{0.95}}{nI(\mu)}}]$ and $[\h\mu - \frac{1.96}{\sqrt{nI(\mu)}}, \h\mu + \frac{1.96}{\sqrt{nI(\mu)}}]$ respectively.
+        \item See the attached code and numerical results. Note that $(nI(\mu))^{-1/2} = \widehat{se}(\h\mu)$, which was calculated in part (b) (iii). The two intervals are the same, which makes sense since $\sqrt{\chi^2_{0.95}} = 1.96$. Finally, both intervals contain the true $\mu = 0$.
+    \end{enumerate}
+\end{enumerate}
+
+\end{document}
