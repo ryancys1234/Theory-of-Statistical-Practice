@@ -1,0 +1,100 @@
+\documentclass[12pt]{article}
+\usepackage[left=.5in, right=.5in, top=.5in, bottom=.5in]{geometry}
+\usepackage[parfill]{parskip}
+\usepackage{amsmath, amssymb}
+\pagenumbering{gobble}
+\setlength\parindent{0pt}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\I}{\mathbb{I}}
+\newcommand{\p}{\mathbb{P}}
+\newcommand{\V}{\text{Var}}
+
+\begin{document}
+
+\begin{center}
+{\Large STA355H1 - Assignment 1}
+\end{center}
+
+\begin{enumerate}
+    \item
+    \begin{enumerate}
+        \item $\E(X_i) = 0\p(X_i = 0) + i\p(X_i = i) - i\p(X_i = -i) = (2i)^{-1} - (2i)^{-1} = 0$ and $\V(X_i) = \E(X_i^2) - \E(X_i)^2 = \E(X_i^2) = 0\p(X_i = 0) + i^2\p(X_i = i) + i^2\p(X_i = -i) = \frac{1}{2} + \frac{1}{2} = 1$.
+        \item Define $Y_i = \sqrt{n}X_i$ so that $\E(Y_i) = \sqrt{n}\E(X_i) = 0 < \infty$. Since the $X_i$'s are independent, the $Y_i$'s are independent as well. Then, by the WLLN, $\frac{1}{\sqrt{n}}\Sigma_{i=1}^n X_i = \frac{1}{n}\Sigma_{i=1}^n Y_i \overset{p}{\to} 0$.
+        \item See the attached code and plots, which show the sum's distribution with the corresponding normal distribution. I conclude that the normal approximation for this distribution is not entirely accurate, since the sum's distribution appears to have a larger kurtosis (higher peak, smaller tails) compared to the normal distribution, and this difference increases with $n$.
+        \item Notice that
+        \begin{align*}
+            \text{kurt}(X_i) = \dfrac{\E[(X_i-\E(X_i))^4]}{\sigma_i^4} = \dfrac{0^4\p(X_i = 0) + i^4\p(X_i = i) + i^4\p(X_i = -i)}{\V(X_i)^2} = \dfrac{i^2/2 + i^2/2}{1^2} = i^2.
+        \end{align*} Then, by the proposition in the provided document "Skewness and Kurtosis and the Central Limit Theorem",
+        \begin{align*}
+            \text{kurt}(S_n) &= (\Sigma_{i=1}^n \sigma_i^2)^{-2}\Sigma_{i=1}^n \sigma_i^4(\text{kurt}(X_i) - 3) + 3 = (\Sigma_{i=1}^n 1)^{-2}\Sigma_{i=1}^n (\text{kurt}(X_i) - 3) + 3\\
+            &= \frac{\Sigma_{i=1}^n i^2}{n^2} - \frac{\Sigma_{i=1}^n 3}{n^2} + 3 = \frac{n(n+1)(2n+1)}{6n^2} - \frac{3}{n} + 3 = \frac{2n^2 + 3n + 1 - 18 + 18n}{6n}\\
+            &= \frac{n}{3} + \frac{7}{2} - \frac{17}{6n}
+        \end{align*} where $\Sigma_{i=1}^n i^2 = n(n+1)(2n+1)/6$. Using this result, the kurtosis values calculated for $n = 10, 20, 50$, and $100$ are $6.55, 10.03, 20.11$, and $36.81$ respectively. In other words, as $n$ increases, the kurtosis increases and diverges away from 3, which is the kurtosis of the normal distribution. Thus, the normal approximation is not entirely accurate, confirming my conclusions in (c).
+    \end{enumerate}
+    \item
+    \begin{enumerate}
+        \item By the Taylor expansion,
+        \begin{align*}
+            g(X_n) - g(\theta) &= g'(\theta)(X_n-\theta) + \frac{1}{2}g''(\theta)(X_n-\theta)^2 + r_n = \frac{1}{2}g''(\theta)(X_n-\theta)^2 + r_n\\
+            \implies \alpha_n^2(g(X_n) - g(\theta)) &= \frac{1}{2}g''(\theta)(\alpha_n(X_n-\theta))^2 + \frac{r_n}{(X_n-\theta)^2}(\alpha_n(X_n-\theta))^2.
+        \end{align*} By the continuous mapping theorem, $(\alpha_n(X_n-\theta))^2 \overset{d}{\to} Z^2$ since $f(x) = x^2$ is continuous. Thus, $\dfrac{1}{2}g''(\theta)(\alpha_n(X_n-\theta))^2 \overset{d}{\to} \dfrac{1}{2}g''(\theta)Z^2$. Also, assuming that $\dfrac{r_n}{(X_n-\theta)^2} \overset{p}{\to} 0$, $\dfrac{r_n}{(X_n-\theta)^2}(\alpha_n(X_n-\theta))^2 \overset{d}{\to} 0$ by Slutsky's Theorem, and since 0 is a constant, this term actually $\overset{p}{\to} 0$. As a result,
+        \begin{align*}
+            \alpha_n^2(g(X_n) - g(\theta)) \overset{d}{\to} \frac{1}{2}g''(\theta)Z^2 + 0 = \frac{1}{2}g''(\theta)Z^2
+        \end{align*} by Slutsky's Theorem.
+        \item First, $Z/\sigma \sim \mathcal{N}(0,1)$. Since the sum of $n$ squares of standard normal r.v's follows the $\chi^2_n$ distribution, $(Z/\sigma)^2 \sim \chi^2_1$ and so $Z^2 \sim \sigma^2\chi^2_1$. Thus, $\alpha_n^2(g(X_n) - g(\theta)) \overset{d}{\to} \frac{1}{2}g''(\theta)Z^2$ or $\frac{\sigma^2}{2}g''(\theta)\chi^2_1$.
+        \item Extending (a),
+        \begin{align*}
+            g(X_n) - g(\theta) &= g'(\theta)(X_n-\theta) + \frac{1}{2}g''(\theta)(X_n-\theta)^2 + \ldots + \frac{1}{k!}g^{(k)}(\theta)(X_n-\theta)^k + r_n\\
+            &= \frac{1}{k!}g^{(k)}(\theta)(X_n-\theta)^k + r_n\\
+            \implies \alpha_n^k(g(X_n) - g(\theta)) &= \frac{1}{k!}g^{(k)}(\theta)(\alpha_n(X_n-\theta))^k + \frac{r_n}{(X_n-\theta)^k}(\alpha_n(X_n-\theta))^k.
+        \end{align*} Similar to in (a), $(\alpha_n(X_n-\theta))^k \overset{d}{\to} Z^k$ and so $\dfrac{1}{k!}g^{(k)}(\theta)(\alpha_n(X_n-\theta))^k \overset{d}{\to} \dfrac{1}{k!}g^{(k)}(\theta)Z^k$. Moreover, assuming that $\dfrac{r_n}{(X_n-\theta)^k} \overset{p}{\to} 0$, $\dfrac{r_n}{(X_n-\theta)^k}(\alpha_n(X_n-\theta))^k \overset{p}{\to} 0$ by Slutsky's Theorem. Thus,
+        \begin{align*}
+            \alpha_n^k(g(X_n) - g(\theta)) \overset{d}{\to} \frac{1}{k!}g^{(k)}(\theta)Z^k + 0 = \frac{1}{k!}g^{(k)}(\theta)Z^k
+        \end{align*} by Slutsky's Theorem.
+    \end{enumerate}
+    \item By the triangle inequality, $|X_i-\bar{X_n}| = |X_i-\mu+\mu-\bar{X_n}| \leq |X_i-\mu| + |\bar{X_n}-\mu|$ and $|X_i-\mu| = |X_i-\bar{X_n}+\bar{X_n}-\mu| \leq |X_i-\bar{X_n}| + |\bar{X_n}-\mu|$. Then,
+    \begin{align*}
+        |X_i-\mu| - |\bar{X_n}-\mu| &\leq |X_i-\bar{X_n}| \leq |X_i-\mu| + |\bar{X_n}-\mu|\\
+        \implies \frac{1}{n}\Sigma_{i=1}^n (|X_i-\mu| - |\bar{X_n}-\mu|) &= \frac{1}{n}\Sigma_{i=1}^n |X_i-\mu| - |\bar{X_n}-\mu| \leq \frac{1}{n}\Sigma_{i=1}^n |X_i-\bar{X_n}|\\
+        \leq \frac{1}{n}\Sigma_{i=1}^n (|X_i-\mu| + |\bar{X_n}-\mu|) &= \frac{1}{n}\Sigma_{i=1}^n |X_i-\mu| + |\bar{X_n}-\mu|
+    \end{align*} Since the $X_i$'s are independent, by the WLLN, $\frac{1}{n}\Sigma_{i=1}^n |X_i - \mu| \overset{p}{\to} \E|X_i - \mu|$ and $\bar{X_n} \overset{p}{\to} \mu$. Thus, both the lower and upper bounds $\overset{p}{\to} \E|X_i - \mu|$, and the squeeze theorem for convergence in probability (proved below as the lemma) then implies $\frac{1}{n}\Sigma_{i=1}^n |X_i-\bar{X_n}| \overset{p}{\to} \E|X_i - \mu|$.
+    
+    \textit{Lemma:} For random variables $X_n,Y_n,Z_n$ with $X_n,Z_n \overset{p}{\to} \mu \in \mathbb{R}$, $X_n\leq Y_n\leq Z_n\implies Y_n \overset{p}{\to} \mu$. Proof: $X_n\leq Y_n\leq Z_n \implies X_n-\mu\leq Y_n-\mu\leq Z_n-\mu \implies \{|Y_n-\mu|\geq\varepsilon\} \subseteq \{|X_n-\mu|\geq\varepsilon\} \cup \{|Z_n-\mu|\geq\varepsilon\} \implies \lim \limits_{n\to\infty} \p(|Y_n-\mu|\geq\varepsilon) \leq \lim \limits_{n\to\infty} \p(|X_n-\mu|\geq\varepsilon) + \lim \limits_{n\to\infty} \p(|Z_n-\mu|\geq\varepsilon) = 0$.
+    \item
+    \begin{enumerate}
+        \item Define $Y = \lambda X$. Note that
+        \begin{align*}
+            \text{skew}(Y) &= \dfrac{\E[(\lambda X - \E(\lambda X))^3]}{(\V(\lambda X))^{3/2}} = \dfrac{\lambda^3\E[(X-\E(X))]^3}{\lambda^3(\V(X))^{3/2}} = \text{skew}(X) \text{ and}\\
+            \text{kurt}(Y) &= \dfrac{\E[(\lambda X - \E(\lambda X))^4]}{(\V(\lambda X))^2} = \dfrac{\lambda^4\E[(X-\E(X))]^4}{\lambda^4(\V(X))^2} = \text{kurt}(X).
+        \end{align*} Thus, skewness and kurtosis does not depend on $\lambda$. Also, since $g(x) = \lambda x$ is monotonic, by the change of variables formula,
+        \begin{align*}
+            f_Y(y) = \frac{f_X(g^{-1}(y))}{g'(g^{-1}(y))} = \frac{\lambda^\alpha}{\lambda\Gamma(\alpha)}(\frac{y}{\lambda})^{\alpha-1}e^{-\lambda y/\lambda} = \frac{y^{\alpha-1}e^{-y}}{\Gamma(\alpha)},
+        \end{align*} so $Y \sim \text{Gamma}(\alpha,1)$ and
+        \begin{align*}
+            \E(Y^k) = \int_0^\infty f_Y(y)dy = \frac{1}{\Gamma(\alpha)}\int_0^\infty y^k y^{\alpha-1}e^{-y}dy = \frac{\Gamma(\alpha+k)}{\Gamma(\alpha)}
+        \end{align*} for $k \in \mathbb{N}^+$ by the definition of the gamma function. Using this identity and the fact that $\Gamma(k+1) = k! = k\Gamma(k)$, we have
+        \begin{align*}
+            \E(Y) &= \frac{\Gamma(\alpha+1)}{\Gamma(\alpha)} = \frac{\alpha\Gamma(\alpha)}{\Gamma(\alpha)} = \alpha\\
+            \E(Y^2) &= \frac{\Gamma(\alpha+2)}{\Gamma(\alpha)} = \frac{(\alpha+1)\Gamma(\alpha+1)}{\Gamma(\alpha)} = (\alpha+1)\E(Y) = \alpha(\alpha+1)\\
+            \E(Y^3) &= \frac{\Gamma(\alpha+3)}{\Gamma(\alpha)} = \frac{(\alpha+2)\Gamma(\alpha+2)}{\Gamma(\alpha)} = (\alpha+2)\E(Y^2) = \alpha(\alpha+1)(\alpha+2)\\
+            \E(Y^4) &= \frac{\Gamma(\alpha+4)}{\Gamma(\alpha)} = \frac{(\alpha+3)\Gamma(\alpha+3)}{\Gamma(\alpha)} = (\alpha+3)\E(Y^3) = \alpha(\alpha+1)(\alpha+2)(\alpha+3)\\
+            \V(Y) &= \E(Y^2) - \E(Y)^2 = \alpha(\alpha+1) - \alpha^2 = \alpha\\
+            \text{skew}(X) &= \text{skew}(Y) = \frac{\E[(Y-\alpha)^3]}{\alpha^{3/2}} = \frac{\E(Y^3 - 3\alpha Y^2 + 3\alpha^2 Y - \alpha^3)}{\alpha^{3/2}}\\
+            &= \frac{(\alpha+1)(\alpha+2) - 3\alpha(\alpha+1) + 3\alpha^2 - \alpha^2}{\alpha^{1/2}} = \frac{2}{\alpha^{1/2}}\\
+            \text{kurt}(X) &= \text{kurt}(Y) = \frac{\E[(Y-\alpha)^4]}{\alpha^2} = \frac{\E(Y^4 - 4\alpha Y^3 + 6\alpha^2 Y^2 - 4\alpha^3 Y + \alpha^4)}{\alpha^2}\\
+            &= \frac{(\alpha+1)(\alpha+2)(\alpha+3) - 4\alpha(\alpha+1)(\alpha+2) + 6\alpha^2(\alpha+1) - 4\alpha^3 + \alpha^3}{\alpha}\\
+            &= \frac{3\alpha + 6}{\alpha} = 3 + \frac{6}{\alpha}.
+        \end{align*} As $\alpha\to\infty$, $\text{skew}(X)\to 0$ and $\text{kurt}(X)\to 3$, which are the skewness and kurtosis of a normal distribution.
+        \item Note that
+        \begin{align*}
+            \E(S_n^3) &= \E[(X_1 + \ldots + X_n)(X_1 + \ldots + X_n)(X_1 + \ldots + X_n)]\\
+            &= \Sigma_{i=1}^n \E(X_i^3) + \Sigma_{i\neq j} \E(X_i^2)\E(X_j) + \Sigma_{i\neq j\neq k} \E(X_i)\E(X_j)\E(X_k)\\
+            &= \Sigma_{i=1}^n \E(X_i^3) = \Sigma_{i=1}^n \sigma_i^3\text{skew}(X_i)
+        \end{align*} since the $X_i$'s are independent, $\E(X_i) = 0$, and $\text{skew}(X_i) = \E(X_i^3)/\sigma_i^3$. Also, $\E(S_n) = \Sigma_{i=1}^n \E(X_i) = 0$ and $\V(S_n) = \V(\Sigma_{i=1}^n X_i) = \Sigma_{i=1}^n \V(X_i)$ by independence. Hence, by definition,
+    \begin{align*}
+        \text{skew}(S_n) = \frac{\E[(S_n-\E(S_n))^3]}{(\V(S_n))^{3/2}} = \frac{\Sigma_{i=1}^n\E(X_i^3)}{(\Sigma_{i=1}^n \V(X_i))^{3/2}} = \frac{\Sigma_{i=1}^n \sigma_i^3\text{skew}(X_i)}{(\Sigma_{i=1}^n \sigma_i^2)^{3/2}}.
+    \end{align*}
+    \end{enumerate}
+\end{enumerate}
+
+\end{document}
